@@ -6,15 +6,20 @@ import { useRouter } from 'next/navigation';
 
 export default function RecruiterPage() {
   const [message, setMessage] = useState('');
+  const [success, setSuccess] = useState(false);
   const router = useRouter();
 
   async function handleSubmit(formData: FormData) {
     const result = await postInternship(formData);
     setMessage(result.message);
-    
-    // Optional: Redirect to search page to "Validate" the insertion
-    if (result.success) {
-      setTimeout(() => router.push('/search'), 2000);
+    setSuccess(result.success);
+    // REMOVED: setTimeout
+  }
+
+  function handleDismiss() {
+    setMessage('');
+    if (success) {
+      router.push('/search');
     }
   }
 
@@ -28,43 +33,54 @@ export default function RecruiterPage() {
           </span>
         </div>
 
+        {/* UPDATED MESSAGE BOX */}
         {message && (
-          <div className="p-4 mb-6 rounded-xl bg-emerald-900/20 border border-emerald-500 text-emerald-200">
-            {message}
+          <div className={`p-4 mb-6 rounded-xl border flex justify-between items-center ${!success ? 'bg-rose-900/20 border-rose-500 text-rose-200' : 'bg-emerald-900/20 border-emerald-500 text-emerald-200'}`}>
+            <span>{message}</span>
+            <button 
+              onClick={handleDismiss}
+              className={`px-4 py-1 rounded-lg font-bold text-sm transition-colors ml-4
+                ${!success
+                  ? 'bg-rose-500/20 hover:bg-rose-500/40 text-rose-100' 
+                  : 'bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-100'}`}
+            >
+              Okay
+            </button>
           </div>
         )}
 
-        <form action={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input name="title" placeholder="Job Title (e.g. Backend Intern)" required className="input-std" />
-            <input name="location" placeholder="Location (e.g. Remote)" required className="input-std" />
-          </div>
+        {!message || !success ? (
+          <form action={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input name="title" placeholder="Job Title (e.g. Backend Intern)" required className="input-std" />
+              <input name="location" placeholder="Location (e.g. Remote)" required className="input-std" />
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <input name="salary" type="number" placeholder="Salary (e.g. 60000)" className="input-std" />
-             {/* Read-only field just to show the user what will happen */}
-             <input value="Status: Open" readOnly className="input-std opacity-60 cursor-not-allowed" />
-          </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input name="salary" type="number" placeholder="Salary (e.g. 60000)" className="input-std" />
+              <input value="Status: Open" readOnly className="input-std opacity-60 cursor-not-allowed" />
+            </div>
 
-          <textarea 
-            name="description" 
-            placeholder="Job Description..." 
-            rows={4} 
-            className="input-std w-full"
-            required
-          />
+            <textarea 
+              name="description" 
+              placeholder="Job Description..." 
+              rows={4} 
+              className="input-std w-full"
+              required
+            />
 
-          <textarea 
-            name="requirements" 
-            placeholder="Requirements (e.g. Python, SQL, Git)..." 
-            rows={2} 
-            className="input-std w-full"
-          />
+            <textarea 
+              name="requirements" 
+              placeholder="Requirements (e.g. Python, SQL, Git)..." 
+              rows={2} 
+              className="input-std w-full"
+            />
 
-          <button type="submit" className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-emerald-900/20 mt-4">
-            Publish Internship
-          </button>
-        </form>
+            <button type="submit" className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-emerald-900/20 mt-4">
+              Publish Internship
+            </button>
+          </form>
+        ) : null}
       </div>
     </div>
   );
